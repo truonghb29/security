@@ -26,6 +26,11 @@ dependencies {
 	implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
 	// Bucket4j
 	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
+	// Spring Boot Starter Validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	// Dotenv
+	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+	implementation 'javax.annotation:javax.annotation-api:1.3.2'
 	// DevTools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	// Test

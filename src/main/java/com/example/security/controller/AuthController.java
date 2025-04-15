@@ -3,11 +3,15 @@ package com.example.security.controller;
 import com.example.security.dto.LoginRequest;
 import com.example.security.dto.LoginResponse;
 import com.example.security.dto.RefreshTokenRequest;
+import com.example.security.dto.SignupRequest;
 import com.example.security.entity.RefreshToken;
 import com.example.security.entity.User;
 import com.example.security.repository.UserRepository;
 import com.example.security.security.JwtUtil;
 import com.example.security.service.RefreshTokenService;
+
+import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +46,7 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         logger.info("Login request received for username: {}", request.getUsername());
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -79,22 +83,20 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> signup(@Valid @RequestBody LoginRequest request) {
         logger.info("Signup request received for username: {}", request.getUsername());
         try {
-            // Kiểm tra username đã tồn tại chưa
             if (userRepository.existsByUsername(request.getUsername())) {
                 logger.warn("Username already exists: {}", request.getUsername());
                 return ResponseEntity.badRequest().body("Username already exists");
             }
 
-            // Tạo user mới
             User user = new User();
             user.setUsername(request.getUsername());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setRoles(Arrays.asList("USER")); // Mặc định role là USER
+            user.setRoles(Arrays.asList("USER"));
             userRepository.save(user);
-
+            System.out.println("User password hash: " + user.getPassword());
             logger.info("Signup successful for username: {}", request.getUsername());
             return ResponseEntity.ok("Signup successful");
         } catch (Exception e) {

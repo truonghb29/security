@@ -4,6 +4,7 @@ import com.example.security.security.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,7 +28,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/api/auth/**", "/swagger-ui/**", "/api-docs/**", "/webjars/**", "/v3/api-docs/**", "/user/all").permitAll()
+                        .requestMatchers("/auth/**", "/swagger-ui/**", "/api-docs/**", "/webjars/**", "/v3/api-docs/**", "/user/all").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/todos/**").hasRole("USER") // Thay hasAuthority("SCOPE_todos:read") bằng hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/todos/**").hasRole("USER") // Thay hasAuthority("SCOPE_todos:write") bằng hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/todos/**").hasRole("USER") // Thay hasAuthority("SCOPE_todos:write") bằng hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/todos/**").hasRole("USER") // Thay hasAuthority("SCOPE_todos:write") bằng hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

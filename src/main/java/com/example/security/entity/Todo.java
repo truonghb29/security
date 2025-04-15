@@ -1,15 +1,21 @@
 package com.example.security.entity;
 
-public class Todo {
-    private String id;
-    private String title;
-    private boolean completed;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-    // Getters, setters, constructors
+public class Todo {
+
+    private String id;
+
+    @NotBlank(message = "Title is required")
+    @Size(max = 100, message = "Title cannot exceed 100 characters")
+    private String title;
+
+    private boolean completed ;
+
     public Todo() {}
 
     public Todo( String title) {
-        this.id = id;
         this.title = title;
         this.completed = false;
     }
@@ -29,9 +35,11 @@ public class Todo {
     public void setTitle(String title) {
         this.title = title;
     }
+
     public boolean isCompleted() {
         return completed;
     }
+
     public void setCompleted(boolean completed) {
         this.completed = completed;
     }
