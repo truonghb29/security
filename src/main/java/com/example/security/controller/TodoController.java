@@ -48,7 +48,6 @@ public class TodoController {
             if (userOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-
             Todo todo = new Todo();
             User user = userOptional.get();
             todo.setId(UUID.randomUUID().toString());
@@ -77,7 +76,7 @@ public class TodoController {
             User user = userOptional.get();
             List<Todo> todos = user.getTodos();
             for (int i = 0; i < todos.size(); i++) {
-                if (todoId.equals(todos.get(i).getId())) { // Changed order to prevent NPE
+                if (todoId.equals(todos.get(i).getId())) {
                     updatedTodo.setId(todoId);
                     todos.set(i, updatedTodo);
                     userRepository.save(user);
@@ -90,7 +89,6 @@ public class TodoController {
         }
     }
 
-    // Delete a todo for a user
     @DeleteMapping("/{todoId}")
     public ResponseEntity<List<Todo>> deleteTodo(
             @RequestHeader("Authorization") @Parameter(hidden = true) String token,
@@ -102,9 +100,7 @@ public class TodoController {
             }
 
             User user = userOptional.get();
-            boolean removed = user.getTodos().removeIf(todo ->
-                    todoId.equals(todo.getId())); // Changed order to prevent NPE
-
+            boolean removed = user.getTodos().removeIf(todo -> todoId.equals(todo.getId()));
             if (removed) {
                 userRepository.save(user);
                 return ResponseEntity.ok(user.getTodos());
@@ -115,14 +111,19 @@ public class TodoController {
         }
     }
 
+    // Helper method to get user from JWT token
     private Optional<User> getUserFromToken(String token) {
         String jwt = token.startsWith("Bearer ") ? token.substring(7) : token;
         String username = jwtUtil.getUsername(jwt);
         return userRepository.findByUsername(username);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid request format");
+    // Exception handler for malformed JSON
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            Exception.class
+    })
+    public ResponseEntity<String> handleExceptions(Exception ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error processing request");
     }
 }
