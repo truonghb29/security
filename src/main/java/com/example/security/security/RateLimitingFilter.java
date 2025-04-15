@@ -32,8 +32,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String path = request.getRequestURI();
-        // Chỉ áp dụng rate limiting cho /auth/login
-        if (!path.startsWith("/auth/login")) {
+        // Chỉ áp dụng rate limiting cho /api/auth/login
+        if (!path.startsWith("/api/auth/login")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -44,7 +44,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
-            response.setStatus(429); // Too Many Requests
+            response.setStatus(429);
             response.getWriter().write("Too many requests");
         }
     }
