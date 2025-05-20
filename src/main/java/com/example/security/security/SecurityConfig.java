@@ -1,6 +1,5 @@
 package com.example.security.security;
 
-import com.example.security.security.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,19 +21,25 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/swagger-ui/**", "/api-docs/**", "/webjars/**", "/v3/api-docs/**", "/user/all").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/todos/**").hasRole("USER") // Thay hasAuthority("SCOPE_todos:read") bằng hasRole("USER")
-                        .requestMatchers(HttpMethod.POST, "/todos/**").hasRole("USER") // Thay hasAuthority("SCOPE_todos:write") bằng hasRole("USER")
-                        .requestMatchers(HttpMethod.PUT, "/todos/**").hasRole("USER") // Thay hasAuthority("SCOPE_todos:write") bằng hasRole("USER")
-                        .requestMatchers(HttpMethod.DELETE, "/todos/**").hasRole("USER") // Thay hasAuthority("SCOPE_todos:write") bằng hasRole("USER")
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/auth/**", "/swagger-ui/**", "/api-docs/**", "/webjars/**", "/v3/api-docs/**",
+                                "/user/all")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/todos/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/todos/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/todos/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/todos/**").hasRole("USER")
+                        .anyRequest().authenticated())
+                // Add rateLimitingFilter before jwtFilter to perform rate limiting first
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -46,7 +51,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }

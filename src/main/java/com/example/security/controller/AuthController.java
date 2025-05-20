@@ -83,7 +83,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
         logger.info("Signup request received for username: {}", request.getUsername());
         try {
             if (userRepository.existsByUsername(request.getUsername())) {
